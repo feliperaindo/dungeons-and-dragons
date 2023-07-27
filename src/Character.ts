@@ -103,4 +103,9 @@ export default class Character implements Fighter {
     this._maxLifePoints = this.incrementLife();
     this._lifePoints = this.maxLifePoints;
   }
+
+  // public special(enemy: Fighter): void {
+  //   this._energy.amount = 1;
+  //   enemy.
+  // }
 }
