@@ -5,7 +5,8 @@ import { EnergyType } from '../Energy';
 import Archetype from './Archetype';
 
 export default class Necromancer extends Archetype {
-  private readonly _energyType: EnergyType = 'mana';
+  // Attributes
+  public readonly energyType: EnergyType = 'mana';
 
   private static newInstancesCounter = 0;
 
@@ -15,11 +16,8 @@ export default class Necromancer extends Archetype {
     Necromancer.newInstancesCounter += 1;
   }
 
+  // Methods
   static createdArchetypeInstances(): number {
     return this.newInstancesCounter;
-  }
-
-  get energyType(): EnergyType {
-    return this._energyType;
   }
 }
