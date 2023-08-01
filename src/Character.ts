@@ -6,17 +6,23 @@ import Fighter, { SimpleFighter } from './Fighter';
 import Race, * as races from './Races';
 import Archetype, * as archetypes from './Archetypes';
 
+// Types
+import { EspecialTypes } from './Types';
+
 // utils
-import getRandomInt from './utils';
+import { getRandomInt, randomEspecial } from './utils';
 
 export default class Character implements Fighter {
   // Private attributes
   private readonly _energy: Energy;
+  private readonly _randomEspecial: EspecialTypes;
   private _defense = getRandomInt();
   private _strength = getRandomInt();
   private _dexterity = getRandomInt();
   private _lifePoints: number;
   private _maxLifePoints: number;
+  private _bonusDefenseActive: boolean;
+  private _bonusDefenseRounds: number;
 
   // Public Attributes
   public readonly race: Race;
@@ -39,8 +45,12 @@ export default class Character implements Fighter {
 
     this._energy = {
       type_: this.archetype.energyType,
-      amount: getRandomInt(),
+      amount: 1,
     };
+
+    this._randomEspecial = randomEspecial();
+    this._bonusDefenseActive = false;
+    this._bonusDefenseRounds = 0;
   }
 
   // Private Methods
@@ -55,6 +65,36 @@ export default class Character implements Fighter {
       return this.race.maxLifePoints;
     } 
     return lifeIncrement;
+  }
+
+  private lifeRecovery(enemy: Fighter): void {
+    this._lifePoints = this._maxLifePoints;
+    enemy.receiveDamage(this.strength);
+  }
+
+  private instaKill(enemy: Fighter): void {
+    enemy.receiveDamage(this.strength + 10000);
+  }
+
+  private bonusAttack(enemy: Fighter): void {
+    enemy.receiveDamage((this.strength + 10));
+  }
+
+  private bonusDefense(enemy: Fighter): void {
+    this._bonusDefenseActive = true;
+    this._bonusDefenseRounds = 3;
+    this._defense += 10;
+    enemy.receiveDamage(this.strength);
+  }
+
+  private checkBonusDefense(): void {
+    if (this._bonusDefenseActive) {
+      this._bonusDefenseRounds -= 1;
+      if (this._bonusDefenseRounds === 0) {
+        this._defense -= 10;
+        this._bonusDefenseActive = false;
+      }
+    }
   }
 
   // Getters
@@ -72,6 +112,9 @@ export default class Character implements Fighter {
 
   // Public Methods
   public attack(enemy: Fighter | SimpleFighter): void {
+    if (this.energy.amount < 10) {
+      this._energy.amount += 1;
+    }
     enemy.receiveDamage(this.strength);
   }
 
@@ -81,6 +124,8 @@ export default class Character implements Fighter {
     const minDamage = 1;
 
     const damage = attackPoints - this.defense;
+
+    this.checkBonusDefense();
 
     if (damage >= this.lifePoints) {
       this._lifePoints = deadLife;
@@ -95,6 +140,19 @@ export default class Character implements Fighter {
     return this.lifePoints;
   }
 
+  public special(enemy: Fighter): void {
+    if (this.energy.amount < 10) {
+      throw new Error('Insufficient energy to use especial move'); 
+    }
+    const Especial = {
+      lifeRecovery: () => this.lifeRecovery(enemy),
+      instaKill: () => this.instaKill(enemy),
+      bonusAttack: () => this.bonusAttack(enemy),
+      bonusDefense: () => this.bonusDefense(enemy),
+    };
+    Especial[this._randomEspecial]();
+  }
+
   public levelUp(): void {
     this._energy.amount = 10;
     this._defense += getRandomInt();
@@ -103,9 +161,4 @@ export default class Character implements Fighter {
     this._maxLifePoints = this.incrementLife();
     this._lifePoints = this.maxLifePoints;
   }
-
-  // public special(enemy: Fighter): void {
-  //   this._energy.amount = 1;
-  //   enemy.
-  // }
 }
