@@ -7,7 +7,7 @@ import Race, * as races from './Races';
 import Archetype, * as archetypes from './Archetypes';
 
 // Types
-import { EspecialTypes } from './Types';
+import * as types from './Types';
 
 // utils
 import { getRandomInt, randomEspecial } from './utils';
@@ -15,7 +15,7 @@ import { getRandomInt, randomEspecial } from './utils';
 export default class Character implements Fighter {
   // Private attributes
   private readonly _energy: Energy;
-  private readonly _randomEspecial: EspecialTypes;
+  private readonly _randomEspecial: types.EspecialTypes;
   private _defense = getRandomInt();
   private _strength = getRandomInt();
   private _dexterity = getRandomInt();
@@ -31,8 +31,8 @@ export default class Character implements Fighter {
 
   constructor(
     name: string,
-    ChosenRace = races.Elf,
-    ChosenArchetype = archetypes.Mage,
+    ChosenRace: types.RacesTypes = races.Elf,
+    ChosenArchetype: types.ArchetypesTypes = archetypes.Mage,
   ) {
     this.name = name;
 
